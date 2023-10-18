@@ -110,6 +110,41 @@ PEP 695 ジェネリッククラス、ジェネリック関数を簡潔に書け
 PEP 695でどう変わったか
 -----------------------
 
+``T = TypeVar('T')`` という記述が不要になった
+
+Python 3.12でのジェネリッククラスの例
+-------------------------------------
+
+.. revealjs-code-block:: python
+
+    class Example[T]:  # 角括弧でTを囲む
+        def __init__(self, value: T) -> None:
+            self.value = value
+
+        def get_value(self) -> T:
+            return self.value
+
+        def get_type(self) -> type:
+            return type(self.value)
+
+    example1 = Example[int](1)
+    print(example1.get_value(), example1.get_type())
+    example2 = Example[str]('hello')
+    print(example2.get_value(), example2.get_type())
+
+Python 3.12でのジェネリック関数の例
+-----------------------------------
+
+.. revealjs-code-block:: python
+
+    from typing import Sequence
+
+    def first[T](l: Sequence[T]) -> T:  # 関数名の右に角括弧でTを囲む
+        return l[0]
+
+    print(first([1, 2, 3]))
+    print(first("python"))
+
 PEP 701 f-stringがネスト可能に
 ------------------------------
 
