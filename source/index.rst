@@ -92,6 +92,21 @@ PEP 695 ジェネリッククラス、ジェネリック関数を簡潔に書け
     example2 = Example[str]('hello')
     print(example2.get_value(), example2.get_type())
 
+ジェネリック関数の例
+--------------------
+
+.. revealjs-code-block:: python
+
+    from typing import Sequence, TypeVar
+
+    T = TypeVar('T')
+
+    def first(l: Sequence[T]) -> T:
+        return l[0]
+
+    print(first([1, 2, 3]))
+    print(first("python"))
+
 PEP 695でどう変わったか
 -----------------------
 
