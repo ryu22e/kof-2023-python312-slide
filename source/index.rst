@@ -40,6 +40,29 @@ PEP 695 ジェネリッククラス、ジェネリック関数を簡潔に書け
 型ヒントとは
 ------------
 
+- Python 3.5で追加された機能
+- コードに型ヒントを付けることで型チェッカー（Mypy、Pyrightなど）で型と矛盾するコードを書いていないか検証できる
+- 実行時に型チェックはしてくれない
+
+型ヒントの例
+------------
+
+.. revealjs-code-block:: python
+
+    def example(message: str, count: int) -> str:
+        return message * count
+
+    print(example("hello", 3))  # OK
+    print(example("hello", "3"))  # NG
+
+型ヒントの例（続き）
+--------------------
+
+.. figure:: mypy-example.*
+   :alt: pyrightの実行結果
+
+   pyrightの実行結果
+
 ジェネリッククラス、ジェネリック関数とは
 ----------------------------------------
 
