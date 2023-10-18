@@ -66,6 +66,32 @@ PEP 695 ジェネリッククラス、ジェネリック関数を簡潔に書け
 ジェネリッククラス、ジェネリック関数とは
 ----------------------------------------
 
+特定の型に依存しないクラス、関数を定義できる
+
+ジェネリッククラスの例
+----------------------
+
+.. revealjs-code-block:: python
+
+    from typing import Generic, TypeVar
+
+    T = TypeVar('T')
+
+    class Example(Generic[T]):
+        def __init__(self, value: T) -> None:
+            self.value = value
+
+        def get_value(self) -> T:
+            return self.value
+
+        def get_type(self) -> type:
+            return type(self.value)
+
+    example1 = Example[int](1)
+    print(example1.get_value(), example1.get_type())
+    example2 = Example[str]('hello')
+    print(example2.get_value(), example2.get_type())
+
 PEP 695でどう変わったか
 -----------------------
 
