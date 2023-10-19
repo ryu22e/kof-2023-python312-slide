@@ -151,8 +151,51 @@ PEP 701 f-stringがネスト可能に
 f-stringとは
 ------------
 
+    フォーマット済み文字リテラル (短くして f-string とも呼びます) では、文字列の頭に f か F を付け、式を {expression} と書くことで、 Python の式の値を文字列の中に入れ込めます。
+
+https://docs.python.org/ja/3.11/tutorial/inputoutput.html#formatted-string-literals
+
+公式ドキュメントに「式を埋め込めます」とは書いているものの…
+-----------------------------------------------------------
+
+（Python 3.11までは）厳密に言うと書けない式もある
+
+.. revealjs-code-block:: python
+
+    >>> d = {"foo": 1, "bar": 2}
+    >>> f"{d["foo"]}"  # "{d[" までを文字列を認識してしまう
+      File "<stdin>", line 1
+        f"{d["foo"]}"
+              ^^^
+    SyntaxError: f-string: unmatched '['
+    >>> f"{d[\"foo\"]}"  # バッククォートでエスケープしてもダメ
+      File "<stdin>", line 1
+        f"{d[\"foo\"]}"
+                       ^
+    SyntaxError: f-string expression part cannot include a backslash
+
 PEP 701でどう変わったか
 -----------------------
+
+パーサが改善され、f-stringにどんな式でも埋め込めるようになった。
+
+.. revealjs-code-block:: python
+
+    >>> d = {"foo": 1, "bar": 2}
+    >>> f"{d['foo']}"
+    '1'
+    >>> f"{f"{f"{f"{f"{f"{1+1}"}"}"}"}"}"
+    '2'
+
+PEP 701でどう変わったか（続き）
+-------------------------------
+
+f-stringの途中で改行やコメントも入れられる。
+
+VS Codeのシンタックスハイライトも効く。
+
+.. figure:: pep701_example_py.*
+   :alt: VS Codeのシンタックスハイライト
 
 パフォーマンスの改善
 ====================
