@@ -371,8 +371,60 @@ PEP 698 メソッドをオーバーライドする際のtypoを防ぐ ``override
 Pythonでメソッドをオーバーライドするには
 ----------------------------------------
 
+メソッド名、引数、戻り値を一致させる。
+
+.. revealjs-code-block:: python
+
+    >>> class Base:
+    ...     def say_hello(self, name):
+    ...         print("Hello, " + name)
+    ...
+    >>> class Example(Base):
+    ...     def say_hello(self, name):
+    ...         print("こんにちは、" + name)
+    ...
+    >>> example = Example()
+    >>> example.say_hello("Taro")
+    こんにちは、Taro
+
+typoがあるとオーバーライドできない
+----------------------------------
+
+.. revealjs-code-block:: python
+
+    >>> class Example(Base):
+    ...     def say_hallo(self, name):  # halloはtypo
+    ...         print("こんにちは、" + name)
+    ...
+    >>> example = Example()
+    >>> example.say_hello("Taro")  # 基底クラスおsay_helloメソッドが呼ばれる
+    Hello, Taro
+
+
 ``override`` デコレータを使うとどうなるか
 -----------------------------------------
+
+``typing.override`` デコレータを付けることでtypoしても型チェッカーが教えてくれる。
+
+.. revealjs-code-block:: python
+
+    from typing import Self, override
+
+    class Base:
+        def say_hello(self: Self, name: str) -> None:
+            print("Hello, " + name)
+
+    class Example(Base):
+        @override
+        def say_hallo(self: Self, name: str) -> None:  # halloはtypo
+            print("こんにちは、" + name)
+
+typoしているコードを型チェックすると
+------------------------------------
+
+該当箇所がエラーになる。
+
+TODO 画面スクリーンショットを貼る
 
 まとめ
 ======
