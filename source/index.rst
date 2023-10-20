@@ -264,6 +264,25 @@ https://peps.python.org/pep-0719/
 PEP 669 ``sys.monitoring`` の追加
 ---------------------------------
 
+関数やメソッド呼び出しなどのタイミングで呼び出すフック関数を登録できるようになった。
+
+``sys.monitoring`` の主な使い方
+-------------------------------
+
+以下の関数を使う。
+
+* ``sys.monitoring.use_tool_id`` : ツールIDを登録
+* ``sys.monitoring.register_callback`` : フック関数を登録
+* ``sys.monitoring.set_events`` : 監視するイベントを登録・登録解除
+* ``sys.monitoring.free_tool_id`` : ツールIDを解放
+
+``sys.monitoring`` のサンプルコード
+-----------------------------------
+
+前述の関数を使ったサンプルコード
+
+TODO Gist URLを書く
+
 エラーメッセージの改善（PEP番号はなし）
 ---------------------------------------
 
