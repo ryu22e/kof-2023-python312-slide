@@ -59,9 +59,9 @@ PEP 695 ジェネリッククラス、ジェネリック関数を簡潔に書け
 --------------------
 
 .. figure:: mypy-example.*
-   :alt: pyrightの実行結果
+   :alt: Mypyの実行結果
 
-   pyrightの実行結果
+   Mypyの実行結果
 
 ジェネリッククラス、ジェネリック関数とは
 ----------------------------------------
@@ -205,11 +205,55 @@ VS Codeのシンタックスハイライトも効く。
 PEP 684 インタプリタごとに固有のGILが使われるように変更
 -------------------------------------------------------
 
-GILとは
+GIL（global interpreter lock）とは
+----------------------------------
+
+以下公式ドキュメントの引用
+
+    CPython インタプリタが利用している、一度にPythonのバイトコードを実行するスレッドは一つだけであることを保証する仕組みです。
+
+https://docs.python.org/ja/3/glossary.html#term-global-interpreter-lock
+
+GILの例
 -------
+
+以下のコードはマルチスレッドを使っているにも関わらず、 ``print_hello`` 関数が同時に実行されない。
+
+.. revealjs-code-block:: python
+
+    import threading
+
+    def print_hello():  # この関数はGILにより同時に実行されない
+        print("Hello!")
+
+    threads = []
+    for _ in range(3):
+        thread = threading.Thread(target=print_hello)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
 
 PEP 684でどう変わったか
 -----------------------
+
+- インタプリタが固有のGILを持つサブインタプリタを作成できるようになった
+- つまり、異なるサブインタプリタ間ではGILが起こらない
+
+これで問題は解決した、と言いたいところだが…
+-------------------------------------------
+
+* ただし、現在はC-APIを通じてのみ利用可能で、Pythonコードからは利用できない
+* Pythonコードから利用するには `PEP 554 <https://peps.python.org/pep-0554/>`_ の実装が必要（Python 3.13で実装予定）
+
+Python 3.13のリリース予定日は？
+-------------------------------
+
+最終盤は2024年10月1日リリース予定。気長に待とう！
+
+https://peps.python.org/pep-0719/
+
 
 デバッグ・モニタリング方法の改善
 ================================
