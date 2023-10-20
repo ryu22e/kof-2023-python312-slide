@@ -254,7 +254,6 @@ Python 3.13のリリース予定日は？
 
 https://peps.python.org/pep-0719/
 
-
 デバッグ・モニタリング方法の改善
 ================================
 
@@ -299,11 +298,67 @@ PEP 688 Pythonコードからバッファプロトコルにアクセスできる
 PEP 692 ``*kwargs`` 引数に付けられる型ヒントに関する改善
 --------------------------------------------------------
 
+Pythonの関数の引数指定方法
+--------------------------
+
+Pythonの関数の引数指定方法は以下の2つ。
+
+.. revealjs-code-block:: python
+
+    >>> example(1, 2)  # 位置引数
+    >>> example(a=1, b=2)  # キーワード引数
+
 ``*kwargs`` 引数とは
 --------------------
 
+* 引数名の先頭に ``**`` を付けると、どんなキーワード引数でも受け付ける引数になる
+* 関数内では ``kwargs`` を辞書型の値として扱う
+* ``kwargs`` という名前は別の名前でも良いが、慣例として ``kwargs`` （読み: クワーグス。keyword argumentsの略）とすることが多い
+
+``**kwargs`` 引数の例
+---------------------
+
+.. revealjs-code-block:: python
+
+    >>> def example(**kwargs):
+    ...     print(kwargs)
+    ...
+    >>> example(foo=1, bar=2)
+    {'foo': 1, 'bar': 2}
+    >>> example(last_name="Tsutsui", first_name="Ryuji")
+    {'last_name': 'Tsutsui', 'first_name': 'Ryuji'}
+
+Python 3.11までの ``**kwargs`` 引数への型ヒントの付け方
+-------------------------------------------------------
+
+すべてのキーワード引数で同じ型を指定することしかできなかった。
+
+.. revealjs-code-block:: python
+
+    def example(**kwargs: str) -> None:
+        ...
+
+    example(foo="test1", bar="test2")  # すべてのキーワード引数が文字列なのでOK
+    example(foo="test1", bar=2)  # bar引数が整数値なのでNG
+
 PEP 692でどう変わったか
 -----------------------
+
+``typing.TypedDict`` と ``typing.Unpack`` を組み合わせて ``**kwargs`` 引数に型ヒントを付けられるようになった。
+
+.. revealjs-code-block:: python
+
+    from typing import TypedDict, Unpack, assert_type
+
+    class Book(TypedDict):
+        title: str
+        price: int
+
+    def add_book(**kwargs: Unpack[Book]) -> None:
+        assert_type(kwargs, Book)  # エラーにならない
+
+    add_book(title="Python実践レシピ", price=2790)
+    add_book(title="Python実践レシピ", price="2,970円（本体2,700円＋税10%）")
 
 PEP 698 メソッドをオーバーライドする際のtypoを防ぐ ``override`` デコレータの登場
 --------------------------------------------------------------------------------
