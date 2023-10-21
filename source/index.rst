@@ -290,6 +290,151 @@ TODO Gist URLを書く
 エラーメッセージの改善（PEP番号はなし）
 ---------------------------------------
 
+Pythonエラーメッセージは改善を続けている
+----------------------------------------
+
+Python 3.10で「Better error messages」が追加された。
+
+これにより、エラーを指摘しているけどどう直していいか分からないメッセージが減った。
+
+https://docs.python.org/ja/3/whatsnew/3.10.html#better-error-messages
+
+Python 3.10でのエラーメッセージの例
+-----------------------------------
+
+Python 3.9
+
+.. revealjs-code-block:: python
+
+    >>> if a
+      File "<stdin>", line 1
+        if a
+            ^
+    SyntaxError: invalid syntax
+
+Python 3.10
+
+.. revealjs-code-block:: python
+
+    >>> # :が足りないと指摘してくれる
+    >>> if a
+      File "<stdin>", line 1
+        if a
+            ^
+    SyntaxError: expected ':'
+
+Python 3.12でのエラーメッセージの例(1)
+--------------------------------------
+
+``NameError`` 時に標準モジュールと同じ名前だとimportを促すメッセージが出てくる。
+
+Python 3.11
+
+.. revealjs-code-block:: python
+
+    >>> sys
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    NameError: name 'sys' is not defined
+
+Python 3.12
+
+.. revealjs-code-block:: python
+
+    >>> sys
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    NameError: name 'sys' is not defined. Did you forget to import 'sys'?
+
+Python 3.12でのエラーメッセージの例(2-1)
+----------------------------------------
+
+``NameError`` 時にクラスの属性と同じ名前だと ``self.属性名`` を書くよう促すメッセージが出てくる。
+
+Python 3.11
+
+.. revealjs-code-block:: python
+
+    >>> class Example:
+    ...     def __init__(self):
+    ...             self.foo = 1
+    ...     def hello(self):
+    ...             a = foo
+    ...
+    >>> Example().hello()
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "<stdin>", line 5, in hello
+    NameError: name 'foo' is not defined
+
+Python 3.12でのエラーメッセージの例(2-2)
+----------------------------------------
+
+Python 3.12
+
+.. revealjs-code-block:: python
+
+    >>> class Example:
+    ...     def __init__(self):
+    ...             self.foo = 1
+    ...     def hello(self):
+    ...             a = foo
+    ...
+    >>> Example().hello()
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "<stdin>", line 5, in hello
+    NameError: name 'foo' is not defined. Did you mean: 'self.foo'?
+
+Python 3.12でのエラーメッセージの例(3)
+----------------------------------------
+
+import文のtypoを指摘してくれる。
+
+Python 3.11
+
+.. revealjs-code-block:: python
+
+    >>> import os from environ
+      File "<stdin>", line 1
+        import os from environ
+                  ^^^^
+    SyntaxError: invalid syntax
+
+Python 3.12
+
+.. revealjs-code-block:: python
+
+    >>> import os from environ
+      File "<stdin>", line 1
+        import os from environ
+        ^^^^^^^^^^^^^^^^^^^^^^
+    SyntaxError: Did you mean to use 'from ... import ...' instead?
+
+Python 3.12でのエラーメッセージの例(4)
+----------------------------------------
+
+``ImportError`` エラー時のメッセージがより具体的になった。
+
+Python 3.11
+
+.. revealjs-code-block:: python
+
+    >>> from collections import chainmap
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    ImportError: cannot import name 'chainmap' from 'collections' (/****/__init__.py)
+
+Python 3.12
+
+.. revealjs-code-block:: python
+
+    >>> from collections import chainmap
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    ImportError: cannot import name 'chainmap' from 'collections' (/****/__init__.py).
+    Did you mean: 'ChainMap'?
+
 その他新機能
 ============
 
