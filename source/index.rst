@@ -362,8 +362,11 @@ PEP 692でどう変わったか
     def add_book(**kwargs: Unpack[Book]) -> None:
         assert_type(kwargs, Book)  # エラーにならない
 
-    add_book(title="Python実践レシピ", price=2790)
-    add_book(title="Python実践レシピ", price="2,970円（本体2,700円＋税10%）")
+    add_book(title="Python実践レシピ", price=2790)  # OK
+    add_book(
+        title="Python実践レシピ",
+        price="2,970円（本体2,700円＋税10%）",  # NG
+    )
 
 PEP 698 メソッドをオーバーライドする際のtypoを防ぐ ``override`` デコレータの登場
 --------------------------------------------------------------------------------
