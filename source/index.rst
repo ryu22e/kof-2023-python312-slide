@@ -19,13 +19,21 @@ Ryuji Tsutsui
 * Ryuji Tsutsui @ryu22e
 * 株式会社hokan所属
 * Python歴は12年くらい（主にDjango）
-* Python Boot Camp、Shonan.py GCPUG Shonanなどコミュニティ活動もしています
+* Python Boot Camp、Shonan.py、GCPUG Shonanなどコミュニティ活動もしています
 * 著書（共著）：『 `Python実践レシピ <https://gihyo.jp/book/2022/978-4-297-12576-9>`_ 』
 
 今日話したいこと
 ----------------
 
 * Python 3.12の新機能を紹介します
+
+セミナーの構成
+--------------
+
+* 新しい構文
+* パフォーマンスの改善
+* デバッグ・モニタリング方法の改善
+* その他新機能
 
 このセミナーから得られるもの
 ----------------------------
@@ -158,7 +166,19 @@ f-stringとは
 
     フォーマット済み文字リテラル (短くして f-string とも呼びます) では、文字列の頭に f か F を付け、式を {expression} と書くことで、 Python の式の値を文字列の中に入れ込めます。
 
-https://docs.python.org/ja/3.11/tutorial/inputoutput.html#formatted-string-literals
+https://docs.python.org/ja/3/tutorial/inputoutput.html#formatted-string-literals
+
+f-stringの例
+------------
+
+.. revealjs-code-block:: python
+
+   >>> name = "Python"
+   >>> f"Hello, {name}!"  # 変数を埋め込める
+   'Hello, Python!'
+   >>> from datetime import datetime
+   >>> f"Today is {datetime.now():%Y-%m-%d}"  # 式を埋め込める
+   'Today is 2023-11-10'
 
 公式ドキュメントに「式を埋め込めます」とは書いているものの…
 -----------------------------------------------------------
@@ -445,6 +465,64 @@ Python 3.12
 PEP 688 Pythonコードからバッファプロトコルにアクセスできるように
 ----------------------------------------------------------------
 
+バッファプロトコルとは何か、の前にプロトコルとは何か
+----------------------------------------------------
+
+特定の動作を実装するために必要なルール。
+
+プロトコルの例(1)
+-----------------
+
+``len`` 関数は引数の長さを返す関数。リスト、タプルなら要素数、文字列なら文字数を返す。
+
+.. revealjs-code-block:: python
+
+    >>> len([1, 2, 3])
+    3
+    >>> len((1, 2, 3))
+    3
+    >>> len('Python')
+    6
+
+プロトコルの例(2)
+-----------------
+
+``len`` 関数には何でも渡せるわけではない。
+
+.. revealjs-code-block:: python
+
+    >>> len(1)
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    TypeError: object of type 'int' has no len()
+    >>> len(None)
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    TypeError: object of type 'NoneType' has no len()
+
+プロトコルの例(3)
+-----------------
+
+どんなオブジェクトなら渡していいかを決めるのがプロトコル。
+
+``len`` 関数の場合は ``__len__`` メソッドを実装しているオブジェクトなら渡していい。
+
+.. revealjs-code-block:: python
+
+    >>> class Example:
+    ...     def __len__(self):
+    ...         return 123
+    ...
+    >>> len(Example())
+    123
+
+それではバッファプロトコルとは何か
+----------------------------------
+
+Pythonより低レイヤーなメモリ配列またはバッファへのアクセスを提供するプロトコル。
+
+組み込みオブジェクトだと ``bytes`` 、 ``bytearray`` などがバッファプロトコルをサポートしている。
+
 PEP 692 ``*kwargs`` 引数に付けられる型ヒントに関する改善
 --------------------------------------------------------
 
@@ -459,7 +537,7 @@ Pythonの関数の引数指定方法は以下の2つ。
     >>> example(a=1, b=2)  # キーワード引数
 
 ``**kwargs`` 引数とは
---------------------
+---------------------
 
 * 引数名の先頭に ``**`` を付けると、どんなキーワード引数でも受け付ける引数になる
 * 関数内では ``kwargs`` を辞書型の値として扱う
