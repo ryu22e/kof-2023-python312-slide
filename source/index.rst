@@ -207,10 +207,16 @@ PEP 701でどう変わったか
 .. revealjs-code-block:: python
 
     >>> d = {"foo": 1, "bar": 2}
-    >>> f"{d['foo']}"
+    >>> f"{d["foo"]}"
     '1'
     >>> f"{f"{f"{f"{f"{f"{1+1}"}"}"}"}"}"
     '2'
+    >>> def example(s):
+    ...     return f"result: {s}"
+    ...
+    >>> import random
+    f"{example(f"{random.randint(1, 10)}")}"
+    'result: 4'
 
 PEP 701でどう変わったか（続き）
 -------------------------------
@@ -270,7 +276,7 @@ PEP 684でどう変わったか
 -------------------------------------------
 
 * 今回追加されたのはC言語から利用できる ``Py_NewInterpreterFromConfig()`` 関数。Pythonコードからは利用できない
-*  `PEP 554 <https://peps.python.org/pep-0554/>`_ が実装されることで初めてPEP 684の恩恵を受けられる（Python 3.13で実装予定）
+*  `PEP 554 <https://peps.python.org/pep-0554/>`_ で追加される ``interpreters`` モジュールを使うことで、初めてPEP 684の恩恵を受けられる（Python 3.13で実装予定）
 
 Python 3.13のリリース予定日は？
 -------------------------------
