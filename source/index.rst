@@ -44,18 +44,21 @@ Ryuji Tsutsui
 新しい構文
 ==========
 
-* PEP 695 ジェネリッククラス、ジェネリック関数を簡潔に書ける新構文の登場
+* PEP 695 型パラメーターの新構文
 * PEP 701 f-stringがネスト可能に
 
-PEP 695 ジェネリッククラス、ジェネリック関数を簡潔に書ける新構文の登場
-----------------------------------------------------------------------
+PEP 695 型パラメーターの新構文
+------------------------------
+
+* ジェネリッククラス、ジェネリック関数に関する構文
+* 型エイリアスに関する構文
 
 型ヒントとは
 ------------
 
-- Python 3.5で追加された機能
-- コードに型ヒントを付けることで型チェッカー（Mypy、Pyrightなど）で型ヒントと矛盾するコードを書いていないか検証できる
-- 実行時に型チェックはしてくれない
+* Python 3.5で追加された機能
+* コードに型ヒントを付けることで型チェッカー（Mypy、Pyrightなど）で型ヒントと矛盾するコードを書いていないか検証できる
+* 実行時に型チェックはしてくれない
 
 型ヒントの例
 ------------
@@ -120,8 +123,8 @@ PEP 695 ジェネリッククラス、ジェネリック関数を簡潔に書け
     print(first([1, 2, 3]))
     print(first("python"))
 
-PEP 695でどう変わったか
------------------------
+PEP 695でジェネリッククラス、ジェネリック関数はどう変わったか
+-------------------------------------------------------------
 
 ``T = TypeVar('T')`` という記述が不要になった。
 
@@ -158,6 +161,20 @@ Python 3.12でのジェネリック関数の例
     print(first([1, 2, 3]))
     print(first("python"))
 
+PEP 695で型エイリアスはどう変わったか
+-------------------------------------
+
+type文が追加された。
+
+.. revealjs-code-block:: python
+
+   >>> # Python 3.11
+   >>> from typing import TypeAlias
+   >>> Point: TypeAlias = tuple[float, float]
+   >>> # Python 3.12
+   >>> type Point = tuple[float, float]
+   >>> type Point[T] = tuple[T, T]  # ジェネリックの構文も使える
+
 PEP 701 f-stringがネスト可能に
 ------------------------------
 
@@ -188,17 +205,17 @@ f-stringの例
 .. revealjs-code-block:: python
 
     >>> d = {"foo": 1, "bar": 2}
-    >>> # "{d[" までを文字列を認識してしまう
+    >>> # "{d[" までを文字列を認識してしまう（一応 f"{d['foo']}" で回避できる）
     >>> f"{d["foo"]}"
       File "<stdin>", line 1
         f"{d["foo"]}"
               ^^^
     SyntaxError: f-string: unmatched '['
-    >>> # バックスラッシュでエスケープしてもダメ
-    >>> f"{d[\"foo\"]}"
+    >>> # バックスラッシュも使えない
+    >>> f"{'\n'.join(['foo', 'bar'])}"
       File "<stdin>", line 1
-        f"{d[\"foo\"]}"
-                       ^
+        f"{'\n'.join(['foo', 'bar'])}"
+                                      ^
     SyntaxError: f-string expression part cannot include a backslash
 
 PEP 701でどう変わったか
@@ -211,6 +228,8 @@ PEP 701でどう変わったか
     >>> d = {"foo": 1, "bar": 2}
     >>> f"{d["foo"]}"
     '1'
+    >>> f"{'\n'.join(['foo', 'bar'])}"
+    'foo\nbar'
     >>> f"{f"{f"{f"{f"{f"{1+1}"}"}"}"}"}"
     '2'
     >>> def example(s):
@@ -298,6 +317,17 @@ PEP 709 内包表記のパフォーマンス改善
    def example(numbers):
        return [f"No.{i}" for i in numbers]
 
+同じことをfor文でやるとこうなる
+-------------------------------
+
+.. revealjs-code-block:: python
+
+   def example(numbers):
+       results = []
+       for i in numbers:
+           results.append(f"No.{i}")
+        return results
+
 PEP 709登場前の内包表記の問題
 -----------------------------
 
@@ -312,17 +342,17 @@ Python 3.11のコンパイル結果
 ---------------------------
 
 .. figure:: pep709-example-before.*
-   :alt: ``python3.11 -m dis pep709_example.py`` の実行結果
+   :alt: ``python3.11 -m dis pep709_example.py`` の実行結果（一部抜粋）
 
-   ``python3.11 -m dis pep709_example.py`` の実行結果
+   ``python3.11 -m dis pep709_example.py`` の実行結果（一部抜粋）
 
 Python 3.12のコンパイル結果
 ---------------------------
 
 .. figure:: pep709-example-after.*
-   :alt: ``python3.12 -m dis pep709_example.py`` の実行結果
+   :alt: ``python3.12 -m dis pep709_example.py`` の実行結果（一部抜粋）
 
-   ``python3.12 -m dis pep709_example.py`` の実行結果
+   ``python3.12 -m dis pep709_example.py`` の実行結果（一部抜粋）
 
 デバッグ・モニタリング方法の改善
 ================================
@@ -521,26 +551,26 @@ PEP 688 Pythonコードからバッファプロトコルにアクセスできる
 バッファプロトコルとは何か、の前にプロトコルとは何か
 ----------------------------------------------------
 
-特定の動作を実装するために必要なルール。
+特定の動作を実現するために必要なオブジェクトの実装に関するルール。
 
 プロトコルの例(1)
 -----------------
 
-``len`` 関数は引数の長さを返す関数。リスト、タプルなら要素数、文字列なら文字数を返す。
+``len()`` 関数は引数の長さを返す組み込み関数。リスト、タプルなら要素数、文字列なら文字数を返す。
 
 .. revealjs-code-block:: python
 
-    >>> len([1, 2, 3])
+    >>> len([1, 2, 3])  # リストなら要素数
     3
-    >>> len((1, 2, 3))
+    >>> len((1, 2, 3))  # タプルなら要素数
     3
-    >>> len('Python')
+    >>> len('Python')  # 文字列なら文字数
     6
 
 プロトコルの例(2)
 -----------------
 
-``len`` 関数には何でも渡せるわけではない。
+``len()`` 関数には何でも渡せるわけではない。
 
 .. revealjs-code-block:: python
 
@@ -553,12 +583,24 @@ PEP 688 Pythonコードからバッファプロトコルにアクセスできる
       File "<stdin>", line 1, in <module>
     TypeError: object of type 'NoneType' has no len()
 
+.. revealjs-break::
+
+.. revealjs-code-block:: python
+
+    >>> class Example:
+    ...     ...
+    ...
+    >>> len(Example())
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    TypeError: object of type 'Example' has no len()
+
 プロトコルの例(3)
 -----------------
 
 どんなオブジェクトなら渡していいかを決めるのがプロトコル。
 
-``len`` 関数の場合は ``__len__`` メソッドを実装しているオブジェクトなら渡していい。
+``len()`` 関数の場合は ``__len__()`` メソッドを実装しているオブジェクトなら渡していい。
 
 .. revealjs-code-block:: python
 
@@ -575,6 +617,28 @@ PEP 688 Pythonコードからバッファプロトコルにアクセスできる
 Pythonより低レイヤーなメモリ配列またはバッファへのアクセスを提供するプロトコル。
 
 組み込みオブジェクトだと ``bytes`` 、 ``bytearray`` などがバッファプロトコルをサポートしている。
+
+PEP 688登場以前にあったバッファプロトコルの問題点
+-------------------------------------------------
+
+バッファプロトコルをサポートしているかどうかはC言語側で実装するので、Pythonコードで表現する手段がなかった。
+
+.. revealjs-break::
+
+関数、メソッドの引数をバッファプロトコルをサポートするオブジェクトのみにしたい場合、型ヒントで表現する手段がなかった。
+
+.. revealjs-break::
+
+``typing.ByteString`` はあるが、組み込み型のみ対象で、独自クラスは対象外。
+
+PEP 688でどう変わったか
+-----------------------
+
+``__buffer__()`` メソッドを実装したオブジェクトはバッファプロトコルをサポートしているとみなされるようになった。
+
+.. revealjs-break::
+
+バッファプロトコルをサポートするオブジェクトを意味する ``collections.abc.Buffer`` 型が追加され、バッファプロトコルをサポートするオブジェクトの型ヒントに指定できるようになった。
 
 PEP 692 ``**kwargs`` 引数に付けられる型ヒントに関する改善
 ---------------------------------------------------------
