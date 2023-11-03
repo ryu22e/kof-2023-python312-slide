@@ -367,7 +367,7 @@ Linux perfとは
 Linux perfの仕様例
 ------------------
 
-``python my_script.py`` を実行したときのCPU使用率を計測するには以下のコマンドを実行する。
+``python my_script.py`` を実行したときのCPU使用率を計測するには以下のコマンドを実行して ``perf.data`` を出力する。
 
 .. revealjs-code-block:: shell
 
@@ -380,6 +380,28 @@ Linux perfの仕様例
 .. revealjs-code-block:: shell
 
    $ perf report --stdio -n -g
+
+実際に計測してみる
+------------------
+
+計測対象のコードは以下の通り。
+
+.. revealjs-code-block:: python
+
+    def foo(n):
+        result = 0
+        for _ in range(n):
+            result += 1
+        return result
+
+    def bar(n):
+        foo(n)
+
+    def baz(n):
+        bar(n)
+
+    if __name__ == "__main__":
+        baz(1000000)
 
 Python 3.11でLinux perfを使った場合
 -----------------------------------
