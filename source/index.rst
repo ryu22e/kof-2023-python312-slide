@@ -254,6 +254,7 @@ VS Codeのシンタックスハイライトも効く。
 
 * PEP 684 インタプリタごとに固有のGILが使われるように変更
 * PEP 709 内包表記のパフォーマンス改善
+* Linux perfのCPythonサポート（PEP番号はなし）
 
 PEP 684 インタプリタごとに固有のGILが使われるように変更
 -------------------------------------------------------
@@ -354,6 +355,69 @@ Python 3.12のコンパイル結果
 
    ``python3.12 -m dis pep709_example.py`` の実行結果（一部抜粋）
 
+Linux perfのCPythonサポート（PEP番号はなし）
+--------------------------------------------
+
+Linux perfとは
+--------------
+
+* パフォーマンス分析ツール
+* どこでどれだけCPUを使っているか計測できる
+
+Linux perfの仕様例
+------------------
+
+``python my_script.py`` を実行したときのCPU使用率を計測するには以下のコマンドを実行する。
+
+.. revealjs-code-block:: shell
+
+   $ perf record -F 9999 -g -o perf.data python my_script.py
+
+.. revealjs-break::
+
+出力された ``perf.data`` を ``perf report`` コマンドで確認する。
+
+.. revealjs-code-block:: shell
+
+   $ perf report --stdio -n -g
+
+Python 3.11でLinux perfを使った場合
+-----------------------------------
+
+以下を参照:
+
+https://gist.github.com/ryu22e/0f5f52712194e4e38c211958288e6267#file-python3-11-md
+
+Python 3.12でLinux perfを使った場合
+-----------------------------------
+
+以下を参照:
+
+https://gist.github.com/ryu22e/0f5f52712194e4e38c211958288e6267#file-python3-12-md
+
+Python 3.12でperfプロファイリングを有効にするには
+-------------------------------------------------
+
+1. 環境変数 ``PYTHONPERFSUPPORT=1`` を設定して実行
+2. ``-X perf`` オプションを付けて実行
+3. ``sys`` モジュールが提供するAPIを使ったコードを入れる（次のスライド参照）
+
+sysモジュールを使ってperfプロファイリングを有効にする例
+-------------------------------------------------------
+
+.. revealjs-code-block:: python
+
+    import sys
+
+    sys.activate_stack_trampoline("perf")
+    do_profiled_stuff()
+    sys.deactivate_stack_trampoline()
+
+    non_profiled_stuff()
+
+    activate_stack_trampoline
+
+
 デバッグ・モニタリング方法の改善
 ================================
 
@@ -388,7 +452,7 @@ PEP 669 ``sys.monitoring`` の追加
 
 前述の関数を使ったサンプルコード。
 
-TODO Gist URLを書く
+https://gist.github.com/ryu22e/87411710176fd1d0ba0f95b0e5f9d6e0
 
 エラーメッセージの改善（PEP番号はなし）
 ---------------------------------------
