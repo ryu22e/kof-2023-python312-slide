@@ -804,6 +804,83 @@ PEP 692でどう変わったか
         price="2,970円（本体2,700円＋税10%）",  # NG
     )
 
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(1)
+-----------------------------------------------------------------
+
+typoを防げる。
+
+.. revealjs-code-block:: python
+
+    from typing import TypedDict, Unpack, assert_type
+
+    class Book(TypedDict):
+        title: str
+        price: int
+
+    def add_book(**kwargs: Unpack[Book]) -> None:
+        assert_type(kwargs, Book)  # エラーにならない
+
+    add_book(title="Python実践レシピ", prica=2790)  # pricaはBookクラスに存在しないのでエラーになる
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-1)
+-------------------------------------------------------------------
+
+「引数の指定を省略している場合」と「明示的に引数を指定している場合」を区別できる。
+
+.. revealjs-code-block:: python
+
+    class Auth:
+        """認証情報"""
+        ...
+
+    def request(url: str, auth: Auth | None = None) -> None:
+        """url引数で指定したURLにリクエストを送る。
+        認証が必要な場合はauth引数に認証情報を指定"""
+        ...
+
+    # auth引数を省略している
+    request("https://example.com")
+    # auth引数に明示的にNoneを指定している
+    request("https://example.com", auth=None)
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-2)
+-------------------------------------------------------------------
+
+明示的に空の認証情報を指定する際のクラスを用意する手もあるが、関数のインターフェースが変わってしまう。
+
+.. revealjs-code-block:: python
+
+    class Auth:
+        """認証情報"""
+        ...
+
+    class Empty(Auth):
+       ...
+
+
+    def request(url: str, auth: Auth | None | Empty = None) -> None:
+        """url引数で指定したURLにリクエストを送る。
+        認証が必要な場合はauth引数に認証情報を指定"""
+        ...
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-3)
+-------------------------------------------------------------------
+
+``**kwargs`` 引数を使うと解決する。
+
+.. revealjs-code-block:: python
+
+    from typing import TypedDict, Unpack, NotRequired
+
+    class OtherParams(TypedDict):
+        auth: NotRequired[Auth]  # 入力必須ではない場合はNotRequiredを指定
+
+    def request(url: str, **kwargs: Unpach[OtherParams]) -> None:
+        if "auth" not in kwargs:
+            print("auth引数が省略された場合の処理が呼ばれた")
+        elif "auth" in kwargs and kwargs["auth"] is None:
+            print("auth引数に明示的にNoneを渡した場合の処理が呼ばれた")
+
 PEP 698 メソッドをオーバーライドする際のtypoを防ぐ ``override`` デコレーターの登場
 ----------------------------------------------------------------------------------
 
