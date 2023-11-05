@@ -254,7 +254,6 @@ VS Codeのシンタックスハイライトも効く。
 
 * PEP 684 インタプリタごとに固有のGILが使われるように変更
 * PEP 709 内包表記のパフォーマンス改善
-* Linux perfのCPythonサポート（PEP番号はなし）
 
 PEP 684 インタプリタごとに固有のGILが使われるように変更
 -------------------------------------------------------
@@ -355,6 +354,43 @@ Python 3.12のコンパイル結果
 
    ``python3.12 -m dis pep709_example.py`` の実行結果（一部抜粋）
 
+デバッグ・モニタリング方法の改善
+================================
+
+* PEP 669 ``sys.monitoring`` の追加
+* Linux perfのCPythonサポート（PEP番号はなし）
+* エラーメッセージの改善（PEP番号はなし）
+
+PEP 669登場前
+-------------
+
+* 従来のプロファイラー、デバッガー（ ``profile`` 、 ``cProfile`` など）はパフォーマンスに重大な問題を引き起こすことがあった
+* 稼働中のアプリケーションにいつ、どの関数、メソッドが呼び出されているか調べるには高速なプロファイラーが必要
+
+PEP 669 ``sys.monitoring`` の追加
+---------------------------------
+
+* ``sys.monitoring`` はCPython上で動作する高速なプロファイラー
+* 関数やメソッド呼び出しなどのタイミングで呼び出すフック関数を登録できる
+
+``sys.monitoring`` の主な使い方
+-------------------------------
+
+以下の関数を使う。
+
+* ``sys.monitoring.use_tool_id`` : ツールIDを登録
+* ``sys.monitoring.register_callback`` : フック関数を登録
+* ``compile`` 、 ``exec`` 関数を使ってコードを実行
+* ``sys.monitoring.set_events`` : 監視するイベントを登録・登録解除
+* ``sys.monitoring.free_tool_id`` : ツールIDを解放
+
+``sys.monitoring`` のサンプルコード
+-----------------------------------
+
+前述の関数を使ったサンプルコード。
+
+https://gist.github.com/ryu22e/87411710176fd1d0ba0f95b0e5f9d6e0
+
 Linux perfのCPythonサポート（PEP番号はなし）
 --------------------------------------------
 
@@ -438,43 +474,6 @@ sysモジュールを使ってperfプロファイリングを有効にする例
     non_profiled_stuff()
 
     activate_stack_trampoline
-
-
-デバッグ・モニタリング方法の改善
-================================
-
-* PEP 669 ``sys.monitoring`` の追加
-* エラーメッセージの改善（PEP番号はなし）
-
-PEP 669登場前
--------------
-
-* 従来のプロファイラー、デバッガー（ ``profile`` 、 ``cProfile`` など）はパフォーマンスに重大な問題を引き起こすことがあった
-* 稼働中のアプリケーションにいつ、どの関数、メソッドが呼び出されているか調べるには高速なプロファイラーが必要
-
-PEP 669 ``sys.monitoring`` の追加
----------------------------------
-
-* ``sys.monitoring`` はCPython上で動作する高速なプロファイラー
-* 関数やメソッド呼び出しなどのタイミングで呼び出すフック関数を登録できる
-
-``sys.monitoring`` の主な使い方
--------------------------------
-
-以下の関数を使う。
-
-* ``sys.monitoring.use_tool_id`` : ツールIDを登録
-* ``sys.monitoring.register_callback`` : フック関数を登録
-* ``compile`` 、 ``exec`` 関数を使ってコードを実行
-* ``sys.monitoring.set_events`` : 監視するイベントを登録・登録解除
-* ``sys.monitoring.free_tool_id`` : ツールIDを解放
-
-``sys.monitoring`` のサンプルコード
------------------------------------
-
-前述の関数を使ったサンプルコード。
-
-https://gist.github.com/ryu22e/87411710176fd1d0ba0f95b0e5f9d6e0
 
 エラーメッセージの改善（PEP番号はなし）
 ---------------------------------------
@@ -804,6 +803,91 @@ PEP 692でどう変わったか
         price="2,970円（本体2,700円＋税10%）",  # NG
     )
 
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(1)
+-----------------------------------------------------------------
+
+typoを防げる。
+
+.. revealjs-code-block:: python
+
+    from typing import TypedDict, Unpack, assert_type
+
+    class Book(TypedDict):
+        title: str
+        price: int
+
+    def add_book(**kwargs: Unpack[Book]) -> None:
+        assert_type(kwargs, Book)  # エラーにならない
+
+    add_book(title="Python実践レシピ", prica=2790)  # pricaはBookクラスに存在しないのでエラーになる
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-1)
+-------------------------------------------------------------------
+
+「引数の指定を省略している場合」と「明示的に引数を指定している場合」を区別できる。
+
+.. revealjs-code-block:: python
+
+    class Auth:
+        """認証情報"""
+        ...
+
+    def request(url: str, auth: Auth | None = None) -> None:
+        """url引数で指定したURLにリクエストを送る。
+        認証が必要な場合はauth引数に認証情報を指定"""
+        ...
+
+    # auth引数を省略している
+    request("https://example.com")
+    # auth引数に明示的にNoneを指定している
+    request("https://example.com", auth=None)
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-2)
+-------------------------------------------------------------------
+
+この問題は `HTTPX <https://www.python-httpx.org/>`_ というライブラリで実際に議論の対象になった。
+`PEP 692のドキュメント <https://peps.python.org/pep-0692/>`_ にもこのIssueに関する記載がある。
+
+https://github.com/encode/httpx/issues/1384
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-3)
+-------------------------------------------------------------------
+
+明示的に空の認証情報を指定する際のクラスを用意する手もあるが、関数のインターフェースが変わってしまう。
+
+.. revealjs-code-block:: python
+
+    class Auth:
+        """認証情報"""
+        ...
+
+    class Empty(Auth):
+       ...
+
+
+    def request(url: str, auth: Auth | None | Empty = None) -> None:
+        """url引数で指定したURLにリクエストを送る。
+        認証が必要な場合はauth引数に認証情報を指定"""
+        ...
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-4)
+-------------------------------------------------------------------
+
+``**kwargs`` 引数を使うと解決する。
+
+.. revealjs-code-block:: python
+
+    from typing import TypedDict, Unpack, NotRequired
+
+    class OtherParams(TypedDict):
+        auth: NotRequired[Auth]  # 入力必須ではない場合はNotRequiredを指定
+
+    def request(url: str, **kwargs: Unpach[OtherParams]) -> None:
+        if "auth" not in kwargs:
+            print("auth引数が省略された場合の処理が呼ばれた")
+        elif "auth" in kwargs and kwargs["auth"] is None:
+            print("auth引数に明示的にNoneを渡した場合の処理が呼ばれた")
+
 PEP 698 メソッドをオーバーライドする際のtypoを防ぐ ``override`` デコレーターの登場
 ----------------------------------------------------------------------------------
 
@@ -869,3 +953,16 @@ typoしているコードを型チェックすると
 
 まとめ
 ======
+
+* 型パラメーターの新構文でジェネリックが楽に書ける。f-stringはネスト可能に
+* GILの改善や内包表記のインライン化などによりPythonのパフォーマンスが向上
+* 新たなデバックやモニタリング方法が登場。エラーメッセージもより親切に
+* 型ヒントの細かい部分の改善により、より型安全なコードが書けるように
+
+ご清聴ありがとうございました
+============================
+
+.. figure:: thank-you-for-your-attention.*
+   :alt: AIが考えた「Python 3.12の素晴らしい進化に興奮を隠しきれないプログラマーたち」
+
+   AIが考えた「Python 3.12の素晴らしい進化に興奮を隠しきれないプログラマーたち」
