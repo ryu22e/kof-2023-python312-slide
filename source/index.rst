@@ -636,7 +636,7 @@ Python 3.12
       File "<stdin>", line 5, in hello
     NameError: name 'foo' is not defined. Did you mean: 'self.foo'?
 
-Python 3.12でのエラーメッセージの例(3)
+Python 3.12でのエラーメッセージの例(3-1)
 ----------------------------------------
 
 import文のtypoを指摘してくれる。
@@ -645,11 +645,15 @@ Python 3.11
 
 .. revealjs-code-block:: python
 
+    >>> # importとfromの順番が逆
     >>> import os from environ
       File "<stdin>", line 1
         import os from environ
                   ^^^^
     SyntaxError: invalid syntax
+
+Python 3.12でのエラーメッセージの例(3-2)
+----------------------------------------
 
 Python 3.12
 
