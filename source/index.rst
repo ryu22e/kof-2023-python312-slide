@@ -381,16 +381,28 @@ PEP 709でどう変わったか
 
 関数オブジェクトを作成していた部分がインライン化された。
 
-Python 3.11のコンパイル結果
----------------------------
+違いを確認してみる
+------------------
+
+Pythonの ``dis`` という標準モジュールを使って、CPythonのバイトコードを逆アセンブルしてみる。
+
+``dis`` モジュールの使い方
+--------------------------
+
+.. revealjs-code-block:: shell
+
+   $ python -m dis {Pythonコードのファイル名}
+
+Python 3.11の場合
+-----------------
 
 .. figure:: pep709-example-before.*
    :alt: ``python3.11 -m dis pep709_example.py`` の実行結果（一部抜粋）
 
    ``python3.11 -m dis pep709_example.py`` の実行結果（一部抜粋）
 
-Python 3.12のコンパイル結果
----------------------------
+Python 3.12の場合
+-----------------
 
 .. figure:: pep709-example-after.*
    :alt: ``python3.12 -m dis pep709_example.py`` の実行結果（一部抜粋）
