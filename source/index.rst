@@ -433,11 +433,11 @@ PEP 669 ``sys.monitoring`` の追加
 
 以下の関数を使う。
 
-* ``sys.monitoring.use_tool_id`` : ツールIDを登録
-* ``sys.monitoring.register_callback`` : フック関数を登録
-* ``compile`` 、 ``exec`` 関数を使ってコードを実行
-* ``sys.monitoring.set_events`` : 監視するイベントを登録・登録解除
-* ``sys.monitoring.free_tool_id`` : ツールIDを解放
+* ``sys.monitoring.use_tool_id()`` : ツールIDを登録
+* ``sys.monitoring.register_callback()`` : フック関数を登録
+* ``compile()`` 、 ``exec()`` 関数を使ってコードを実行
+* ``sys.monitoring.set_events()`` : 監視するイベントを登録・登録解除
+* ``sys.monitoring.free_tool_id()`` : ツールIDを解放
 
 ``sys.monitoring`` のサンプルコード
 -----------------------------------
@@ -661,7 +661,7 @@ Python 3.12
         ^^^^^^^^^^^^^^^^^^^^^^
     SyntaxError: Did you mean to use 'from ... import ...' instead?
 
-Python 3.12でのエラーメッセージの例(4)
+Python 3.12でのエラーメッセージの例(4-1)
 ----------------------------------------
 
 ``ImportError`` エラー時のメッセージがより具体的になった。
@@ -670,10 +670,14 @@ Python 3.11
 
 .. revealjs-code-block:: python
 
+    >>> # chainmapはChainMapのtypo
     >>> from collections import chainmap
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
     ImportError: cannot import name 'chainmap' from 'collections' (/****/__init__.py)
+
+Python 3.12でのエラーメッセージの例(4-2)
+----------------------------------------
 
 Python 3.12
 
