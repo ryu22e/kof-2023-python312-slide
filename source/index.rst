@@ -17,10 +17,16 @@ Ryuji Tsutsui
 --------
 
 * Ryuji Tsutsui @ryu22e
+* `一般社団法人PyCon JP Association運営メンバー <https://www.pycon.jp/committee/members.html#ryuji-tsutsui>`_
 * 株式会社hokan所属
 * Python歴は12年くらい（主にDjango）
 * Python Boot Camp、Shonan.py、GCPUG Shonanなどコミュニティ活動もしています
 * 著書（共著）：『 `Python実践レシピ <https://gihyo.jp/book/2022/978-4-297-12576-9>`_ 』
+
+PR
+--
+
+今日ブース（エリアB No.11）で「Python Boot Camp」、「PyLadies Caravan」の宣伝をやっています。
 
 今日話したいこと
 ----------------
@@ -44,11 +50,11 @@ Ryuji Tsutsui
 新しい構文
 ==========
 
-* PEP 695 型パラメーターの新構文
+* PEP 695 型ヒントの新構文
 * PEP 701 f-stringがネスト可能に
 
-PEP 695 型パラメーターの新構文
-------------------------------
+PEP 695 型ヒントの新構文
+------------------------
 
 * ジェネリッククラス、ジェネリック関数に関する構文
 * 型エイリアスに関する構文
@@ -84,6 +90,8 @@ PEP 695 型パラメーターの新構文
 
 特定の型に依存しないクラス、関数を定義できる。
 
+具体的な型名を書かず抽象的な書き方にして、特定の型に依存しないクラスや関数を定義する。
+
 ジェネリッククラスの例
 ----------------------
 
@@ -91,8 +99,9 @@ PEP 695 型パラメーターの新構文
 
     from typing import Generic, TypeVar
 
-    T = TypeVar('T')
+    T = TypeVar('T')  # 抽象的な型名を定義
 
+    # このクラスがジェネリッククラスであることを宣言する
     class Example(Generic[T]):
         def __init__(self, value: T) -> None:
             self.value = value
@@ -103,9 +112,12 @@ PEP 695 型パラメーターの新構文
         def get_type(self) -> type:
             return type(self.value)
 
+    # クラス名の右に角括弧で具体的な型名を囲む
     example1 = Example[int](1)
+    # 1 <class 'int'> が出力される
     print(example1.get_value(), example1.get_type())
     example2 = Example[str]('hello')
+    # hello <class 'str'> が出力される
     print(example2.get_value(), example2.get_type())
 
 ジェネリック関数の例
@@ -115,25 +127,31 @@ PEP 695 型パラメーターの新構文
 
     from typing import Sequence, TypeVar
 
-    T = TypeVar('T')
+    T = TypeVar('T')  # 抽象的な型名を定義
 
     def first(l: Sequence[T]) -> T:
         return l[0]
 
-    print(first([1, 2, 3]))
-    print(first("python"))
+    print(first([1, 2, 3]))  # 1 が出力される
+    print(first("python"))  # p が出力される
+
+PEP 695登場以前のジェネリッククラス、ジェネリック関数の面倒な点
+---------------------------------------------------------------
+
+* 毎回 ``T = TypeVar('T')`` を書くのが面倒
+* ジェネリッククラスの場合、 ``Generic`` を継承する必要があるのが面倒
 
 PEP 695でジェネリッククラス、ジェネリック関数はどう変わったか
 -------------------------------------------------------------
 
-``T = TypeVar('T')`` という記述が不要になった。
+``T = TypeVar('T')`` を書かない新構文が追加された。
 
 Python 3.12でのジェネリッククラスの例
 -------------------------------------
 
 .. revealjs-code-block:: python
 
-    class Example[T]:  # 角括弧でTを囲む
+    class Example[T]:  # 角括弧でTを囲む（新構文）
         def __init__(self, value: T) -> None:
             self.value = value
 
@@ -155,7 +173,7 @@ Python 3.12でのジェネリック関数の例
 
     from typing import Sequence
 
-    def first[T](l: Sequence[T]) -> T:  # 関数名の右に角括弧でTを囲む
+    def first[T](l: Sequence[T]) -> T:  # 関数名の右に角括弧でTを囲む（新構文）
         return l[0]
 
     print(first([1, 2, 3]))
@@ -174,6 +192,22 @@ type文が追加された。
    >>> # Python 3.12
    >>> type Point = tuple[float, float]
    >>> type Point[T] = tuple[T, T]  # ジェネリックの構文も使える
+
+type文と既存の型エイリアスの違い
+--------------------------------
+
+type文は遅延評価なので、type文の中にまだ定義されていない型を指定できる。
+
+.. revealjs-code-block:: python
+
+   >>> type Foo = int | Bar  # Barはこの時点では定義されていないがエラーにならない
+   >>> type Bar = str
+   >>> # Python 3.11までの書き方だとエラーになる
+   >>> from typing import TypeAlias
+   >>> Foo: TypeAlias = int | Bar
+   Traceback (most recent call last):
+     File "<stdin>", line 1, in <module>
+   NameError: name 'Bar' is not defined
 
 PEP 701 f-stringがネスト可能に
 ------------------------------
@@ -195,7 +229,7 @@ f-stringの例
    'Hello, Python!'
    >>> from datetime import datetime
    >>> f"Today is {datetime.now():%Y-%m-%d}"  # 式を埋め込める
-   'Today is 2023-11-10'
+   'Today is 2023-11-11'
 
 公式ドキュメントに「式を埋め込めます」とは書いているものの…
 -----------------------------------------------------------
@@ -217,6 +251,15 @@ f-stringの例
         f"{'\n'.join(['foo', 'bar'])}"
                                       ^
     SyntaxError: f-string expression part cannot include a backslash
+
+f-stringの仕様はどうなっている？
+--------------------------------
+
+f-string導入に関連するドキュメント `PEP 498 <https://peps.python.org/pep-0498/>`_ では具体的な仕様が定義されていなかった。
+
+    The exact code used to implement f-strings is not specified.
+
+    https://peps.python.org/pep-0498/#code-equivalence
 
 PEP 701でどう変わったか
 -----------------------
@@ -400,7 +443,7 @@ Linux perfとは
 * Linuxカーネル2.6.31以降で利用可能なパフォーマンス分析ツール
 * プログラムのどこでどれだけCPUを使っているか計測できる
 
-Linux perfの仕様例
+Linux perfの使用例
 ------------------
 
 ``python my_script.py`` を実行したときのCPU使用率を計測するには以下のコマンドを実行して ``perf.data`` を出力する。
@@ -510,6 +553,13 @@ Python 3.10
         if a
             ^
     SyntaxError: expected ':'
+
+「Better error messages」についてもっと詳しく知りたい人は
+---------------------------------------------------------
+
+鈴木たかのりさんの『Python 3.10から導入されたBetter error messagesの深掘り』がおすすめ。
+
+https://gihyo.jp/article/2022/12/monthly-python-2212
 
 Python 3.12でのエラーメッセージの例(1)
 --------------------------------------
@@ -622,6 +672,16 @@ Python 3.12
       File "<stdin>", line 1, in <module>
     ImportError: cannot import name 'chainmap' from 'collections' (/****/__init__.py).
     Did you mean: 'ChainMap'?
+
+約1分休憩
+=========
+
+給水します🚰
+
+大阪でお勧めの美味しい店募集
+----------------------------
+
+明日1日フリーなので、いい店があったら行きたいです。このあとブース（エリアB No.11）にいるのでぜひ教えてください🙇
 
 その他新機能
 ============
@@ -753,7 +813,9 @@ Pythonの関数の引数指定方法は以下の2つ。
 
 * 引数名の先頭に ``**`` を付けると、どんなキーワード引数でも受け付ける引数になる
 * 関数内では ``kwargs`` を辞書型の値として扱う
-* ``kwargs`` という名前は別の名前でも良いが、慣例として ``kwargs`` （読み: クワーグス。keyword argumentsの略）とすることが多い
+* 読み方は「クワーグス」（参考URL: https://youtu.be/WcTXxX3vYgY?t=9）
+* keyword argumentsの略
+* 文法的には ``kwargs`` でなくてもいいが、慣習的にこの名前になっている
 
 ``**kwargs`` 引数の例
 ---------------------
@@ -954,7 +1016,7 @@ typoしているコードを型チェックすると
 まとめ
 ======
 
-* 型パラメーターの新構文でジェネリックが楽に書ける。f-stringはネスト可能に
+* 型ヒントの新構文でジェネリックが楽に書ける。f-stringはネスト可能に
 * GILの改善や内包表記のインライン化などによりPythonのパフォーマンスが向上
 * 新たなデバックやモニタリング方法が登場。エラーメッセージもより親切に
 * 型ヒントの細かい部分の改善により、より型安全なコードが書けるように
