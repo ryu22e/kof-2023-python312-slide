@@ -215,6 +215,8 @@ PEP 701 f-stringがネスト可能に
 f-stringとは
 ------------
 
+以下公式ドキュメントの引用。
+
     フォーマット済み文字リテラル (短くして f-string とも呼びます) では、文字列の頭に f か F を付け、式を {expression} と書くことで、 Python の式の値を文字列の中に入れ込めます。
 
 https://docs.python.org/ja/3/tutorial/inputoutput.html#formatted-string-literals
@@ -264,7 +266,7 @@ f-string導入に関連するドキュメント `PEP 498 <https://peps.python.or
 PEP 701でどう変わったか
 -----------------------
 
-パーサが改善され、f-stringにどんな式でも埋め込めるようになった。
+パーサーが改善され、f-stringにどんな式でも埋め込めるようになった。
 
 .. revealjs-code-block:: python
 
@@ -350,14 +352,31 @@ PEP 719によると最終版は2024年10月1日リリース予定。気長に待
 
 https://peps.python.org/pep-0719/
 
+``Python 3.13.0a1`` で ``interpreters`` モジュールを試してみると
+-----------------------------------------------------------
+
+未実装だったので試せず😢
+
+.. revealjs-code-block:: shell
+
+    >>> import interpreters
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    ModuleNotFoundError: No module named 'interpreters'
+
 PEP 709 内包表記のパフォーマンス改善
 ------------------------------------
+
+内包表記とは
+------------
 
 内包表記とは、リスト、辞書、セットを一行で作成できる構文。
 
 .. revealjs-code-block:: python
 
    def example(numbers):
+       """numbers: 整数のリスト"""
+       # リストの各要素に"No."を付けたリストを作成する
        return [f"No.{i}" for i in numbers]
 
 同じことをfor文でやるとこうなる
@@ -393,6 +412,16 @@ Pythonの ``dis`` という標準モジュールを使って、CPythonのバイ�
 
    $ python -m dis {Pythonコードのファイル名}
 
+対象のPythonコード
+------------------
+
+以下の ``pep709_example.py`` を用意する。
+
+.. revealjs-code-block:: python
+
+   def example(numbers):
+       return [f"No.{i}" for i in numbers]
+
 Python 3.11の場合
 -----------------
 
@@ -416,6 +445,9 @@ Python 3.12の場合
 * Linux perfのCPythonサポート（PEP番号はなし）
 * エラーメッセージの改善（PEP番号はなし）
 
+PEP 669 ``sys.monitoring`` の追加
+-----------------------------
+
 PEP 669登場前
 -------------
 
@@ -428,15 +460,28 @@ PEP 669 ``sys.monitoring`` の追加
 * ``sys.monitoring`` はCPython上で動作する高速なプロファイラー
 * 関数やメソッド呼び出しなどのタイミングで呼び出すフック関数を登録できる
 
-``sys.monitoring`` の主な使い方
--------------------------------
+``sys.monitoring`` の主な使い方(1)
+----------------------------------
 
-以下の関数を使う。
+以下で計測の準備。
 
 * ``sys.monitoring.use_tool_id()`` : ツールIDを登録
 * ``sys.monitoring.register_callback()`` : フック関数を登録
-* ``compile()`` 、 ``exec()`` 関数を使ってコードを実行
-* ``sys.monitoring.set_events()`` : 監視するイベントを登録・登録解除
+* ``sys.monitoring.set_events()`` : 監視するイベントを登録
+
+``sys.monitoring`` の主な使い方(2)
+----------------------------------
+
+以下で計測対象コードの実行。
+
+* 組み込み関数の ``compile()`` 、 ``exec()`` 関数を使ってコードを実行
+
+``sys.monitoring`` の主な使い方(3)
+----------------------------------
+
+以下で計測の終了（これを書かないと計測対象以外のコード実行も計測してしまう）。
+
+* ``sys.monitoring.set_events()`` : 監視するイベントの登録解除
 * ``sys.monitoring.free_tool_id()`` : ツールIDを解放
 
 ``sys.monitoring`` のサンプルコード
@@ -538,7 +583,7 @@ Pythonエラーメッセージは改善を続けている
 
 Python 3.10（2021年10月4日リリース）で「Better error messages」が追加された。
 
-CPythonのパーサの改善により、エラーを指摘しているけどどう直していいか分からないメッセージが減った。
+CPythonのパーサーの改善により、エラーを指摘しているけどどう直していいか分からないメッセージが減った。
 
 https://docs.python.org/ja/3/whatsnew/3.10.html#better-error-messages
 
@@ -569,7 +614,7 @@ Python 3.10
 「Better error messages」についてもっと詳しく知りたい人は
 ---------------------------------------------------------
 
-鈴木たかのりさんの『Python 3.10から導入されたBetter error messagesの深掘り』がおすすめ。
+Gihyoさんの連載『Python Monthly Topics』で鈴木たかのりさんが執筆された『Python 3.10から導入されたBetter error messagesの深掘り』がおすすめ。
 
 https://gihyo.jp/article/2022/12/monthly-python-2212
 
@@ -706,12 +751,238 @@ Python 3.12
 その他新機能
 ============
 
-* PEP 688 Pythonコードからバッファプロトコルにアクセスできるように
 * PEP 692 ``**kwargs`` 引数に付けられる型ヒントに関する改善
 * PEP 698 メソッドをオーバーライドする際のtypoを防ぐ ``override`` デコレーターの登場
+* PEP 688 Pythonコードからバッファプロトコルにアクセスできるように
+
+※ PEP 688はかなりニッチな機能なので時間がなければ省略
+
+PEP 692 ``**kwargs`` 引数に付けられる型ヒントに関する改善
+---------------------------------------------------------
+
+Pythonの関数の引数指定方法
+--------------------------
+
+Pythonの関数の引数指定方法は以下の2つ。
+
+.. revealjs-code-block:: python
+
+    >>> def example(a, b):
+    ...     ...
+    ...
+    >>> example(1, 2)  # 関数定義に書かれた順番に値を指定（位置引数）
+    >>> example(a=1, b=2)  # 引数名と値をセットで指定（キーワード引数）
+
+``**kwargs`` 引数とは
+---------------------
+
+* 引数名の先頭に ``**`` を付けると、どんなキーワード引数でも受け付ける引数になる
+* 関数内では ``kwargs`` を辞書型の値として扱う
+* 読み方は「クワーグス」（参考URL: https://youtu.be/WcTXxX3vYgY?t=9）
+* keyword argumentsの略
+* 文法的には先頭に ``**`` があればどんな名前でもいいが、慣習的に ``kwargs`` と書く
+
+``**kwargs`` 引数の例
+---------------------
+
+.. revealjs-code-block:: python
+
+    >>> def example(**kwargs):
+    ...     print(kwargs)
+    ...
+    >>> example(foo=1, bar=2)
+    {'foo': 1, 'bar': 2}
+    >>> example(last_name="Tsutsui", first_name="Ryuji")
+    {'last_name': 'Tsutsui', 'first_name': 'Ryuji'}
+
+Python 3.11までの ``**kwargs`` 引数への型ヒントの付け方
+-------------------------------------------------------
+
+すべてのキーワード引数で同じ型を指定することしかできなかった。
+
+.. revealjs-code-block:: python
+
+    def example(**kwargs: str) -> None:
+        ...
+
+    example(foo="test1", bar="test2")  # すべてのキーワード引数が文字列なのでOK
+    example(foo="test1", bar=2)  # bar引数が整数値なのでNG
+
+PEP 692でどう変わったか
+-----------------------
+
+``typing.TypedDict`` と ``typing.Unpack`` を組み合わせて ``**kwargs`` 引数に型ヒントを付けられるようになった。
+
+.. revealjs-code-block:: python
+
+    from typing import TypedDict, Unpack, assert_type
+
+    class Book(TypedDict):
+        title: str
+        price: int
+
+    def add_book(**kwargs: Unpack[Book]) -> None:
+        assert_type(kwargs, Book)  # エラーにならない
+
+    add_book(title="Python実践レシピ", price=2790)  # OK
+    add_book(
+        title="Python実践レシピ",
+        price="2,970円（本体2,700円＋税10%）",  # NG
+    )
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(1)
+-----------------------------------------------------------------
+
+typoを防げる。
+
+.. revealjs-code-block:: python
+
+    from typing import TypedDict, Unpack, assert_type
+
+    class Book(TypedDict):
+        title: str
+        price: int
+
+    def add_book(**kwargs: Unpack[Book]) -> None:
+        assert_type(kwargs, Book)  # エラーにならない
+
+    # pricaはBookクラスに存在しないのでエラーになる
+    add_book(title="Python実践レシピ", prica=2790)
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-1)
+-------------------------------------------------------------------
+
+「引数の指定を省略している場合」と「明示的に引数を指定している場合」を区別できる。
+
+.. revealjs-code-block:: python
+
+    class Auth:
+        """認証情報"""
+        ...
+
+    def request(url: str, auth: Auth | None = None) -> None:
+        """url引数で指定したURLにリクエストを送る。
+        認証が必要な場合はauth引数に認証情報を指定"""
+        ...
+
+    # auth引数を省略している
+    request("https://example.com")
+    # auth引数に明示的にNoneを指定している
+    request("https://example.com", auth=None)
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-2)
+-------------------------------------------------------------------
+
+この問題は `HTTPX <https://www.python-httpx.org/>`_ というライブラリで実際に議論の対象になった。
+`PEP 692のドキュメント <https://peps.python.org/pep-0692/>`_ にもこのIssueに関する記載がある。
+
+https://github.com/encode/httpx/issues/1384
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-3)
+-------------------------------------------------------------------
+
+明示的に空の認証情報を指定する際のクラスを用意する手もあるが、関数のインターフェースが変わってしまう。
+
+.. revealjs-code-block:: python
+
+    class Auth:
+        """認証情報"""
+        ...
+
+    class Empty(Auth):
+       ...
+
+
+    def request(url: str, auth: Auth | None | Empty = None) -> None:
+        """url引数で指定したURLにリクエストを送る。
+        認証が必要な場合はauth引数に認証情報を指定"""
+        ...
+
+``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-4)
+-------------------------------------------------------------------
+
+``**kwargs`` 引数を使うと解決する。
+
+.. revealjs-code-block:: python
+
+    from typing import TypedDict, Unpack, NotRequired
+
+    class OtherParams(TypedDict):
+        auth: NotRequired[Auth]  # 入力必須ではない場合はNotRequiredを指定
+
+    def request(url: str, **kwargs: Unpach[OtherParams]) -> None:
+        if "auth" not in kwargs:
+            print("auth引数が省略された場合の処理が呼ばれた")
+        elif "auth" in kwargs and kwargs["auth"] is None:
+            print("auth引数に明示的にNoneを渡した場合の処理が呼ばれた")
+
+PEP 698 メソッドをオーバーライドする際のtypoを防ぐ ``override`` デコレーターの登場
+----------------------------------------------------------------------------------
+
+Pythonでメソッドをオーバーライドするには
+----------------------------------------
+
+メソッド名、引数を一致させる。
+
+.. revealjs-code-block:: python
+
+    >>> class Base:
+    ...     def say_hello(self, name):
+    ...         print("Hello, " + name)
+    ...
+    >>> class Example(Base):
+    ...     def say_hello(self, name):
+    ...         print("こんにちは、" + name)
+    ...
+    >>> example = Example()
+    >>> example.say_hello("Taro")
+    こんにちは、Taro
+
+typoがあるとオーバーライドできない
+----------------------------------
+
+.. revealjs-code-block:: python
+
+    >>> class Example(Base):
+    ...     def say_hallo(self, name):  # halloはtypo
+    ...         print("こんにちは、" + name)
+    ...
+    >>> example = Example()
+    >>> example.say_hello("Taro")  # 基底クラスのsay_helloメソッドが呼ばれる
+    Hello, Taro
+
+``override`` デコレーターを使うとどうなるか
+-------------------------------------------
+
+``typing.override`` デコレーターを付けることでtypoしても型チェッカーが教えてくれる。
+
+.. revealjs-code-block:: python
+
+    from typing import Self, override
+
+    class Base:
+        def say_hello(self: Self, name: str) -> None:
+            print("Hello, " + name)
+
+    class Example(Base):
+        @override
+        def say_hallo(self: Self, name: str) -> None:  # halloはtypo
+            print("こんにちは、" + name)
+
+typoしているコードを型チェックすると
+------------------------------------
+
+該当箇所がエラーになる。
+
+.. figure:: pep698_example.*
+   :alt: Mypyの実行結果
+
+   Mypyの実行結果
 
 PEP 688 Pythonコードからバッファプロトコルにアクセスできるように
 ----------------------------------------------------------------
+
+（残り4分切っていたらスキップしてまとめに入る）
 
 バッファプロトコルとは何か、の前にプロトコルとは何か
 ----------------------------------------------------
@@ -812,231 +1083,10 @@ PEP 688でどう変わったか
 
 バッファプロトコルをサポートするオブジェクトを意味する ``collections.abc.Buffer`` 型が追加され、バッファプロトコルをサポートするオブジェクトの型ヒントに指定できるようになった。
 
-PEP 692 ``**kwargs`` 引数に付けられる型ヒントに関する改善
----------------------------------------------------------
-
-Pythonの関数の引数指定方法
---------------------------
-
-Pythonの関数の引数指定方法は以下の2つ。
-
-.. revealjs-code-block:: python
-
-    >>> def example(a, b):
-    ...     ...
-    ...
-    >>> example(1, 2)  # 関数定義に書かれた順番に値を指定（位置引数）
-    >>> example(a=1, b=2)  # 引数名と値をセットで指定（キーワード引数）
-
-``**kwargs`` 引数とは
----------------------
-
-* 引数名の先頭に ``**`` を付けると、どんなキーワード引数でも受け付ける引数になる
-* 関数内では ``kwargs`` を辞書型の値として扱う
-* 読み方は「クワーグス」（参考URL: https://youtu.be/WcTXxX3vYgY?t=9）
-* keyword argumentsの略
-* 文法的には ``kwargs`` でなくてもいいが、慣習的にこの名前になっている
-
-``**kwargs`` 引数の例
----------------------
-
-.. revealjs-code-block:: python
-
-    >>> def example(**kwargs):
-    ...     print(kwargs)
-    ...
-    >>> example(foo=1, bar=2)
-    {'foo': 1, 'bar': 2}
-    >>> example(last_name="Tsutsui", first_name="Ryuji")
-    {'last_name': 'Tsutsui', 'first_name': 'Ryuji'}
-
-Python 3.11までの ``**kwargs`` 引数への型ヒントの付け方
--------------------------------------------------------
-
-すべてのキーワード引数で同じ型を指定することしかできなかった。
-
-.. revealjs-code-block:: python
-
-    def example(**kwargs: str) -> None:
-        ...
-
-    example(foo="test1", bar="test2")  # すべてのキーワード引数が文字列なのでOK
-    example(foo="test1", bar=2)  # bar引数が整数値なのでNG
-
-PEP 692でどう変わったか
------------------------
-
-``typing.TypedDict`` と ``typing.Unpack`` を組み合わせて ``**kwargs`` 引数に型ヒントを付けられるようになった。
-
-.. revealjs-code-block:: python
-
-    from typing import TypedDict, Unpack, assert_type
-
-    class Book(TypedDict):
-        title: str
-        price: int
-
-    def add_book(**kwargs: Unpack[Book]) -> None:
-        assert_type(kwargs, Book)  # エラーにならない
-
-    add_book(title="Python実践レシピ", price=2790)  # OK
-    add_book(
-        title="Python実践レシピ",
-        price="2,970円（本体2,700円＋税10%）",  # NG
-    )
-
-``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(1)
------------------------------------------------------------------
-
-typoを防げる。
-
-.. revealjs-code-block:: python
-
-    from typing import TypedDict, Unpack, assert_type
-
-    class Book(TypedDict):
-        title: str
-        price: int
-
-    def add_book(**kwargs: Unpack[Book]) -> None:
-        assert_type(kwargs, Book)  # エラーにならない
-
-    add_book(title="Python実践レシピ", prica=2790)  # pricaはBookクラスに存在しないのでエラーになる
-
-``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-1)
--------------------------------------------------------------------
-
-「引数の指定を省略している場合」と「明示的に引数を指定している場合」を区別できる。
-
-.. revealjs-code-block:: python
-
-    class Auth:
-        """認証情報"""
-        ...
-
-    def request(url: str, auth: Auth | None = None) -> None:
-        """url引数で指定したURLにリクエストを送る。
-        認証が必要な場合はauth引数に認証情報を指定"""
-        ...
-
-    # auth引数を省略している
-    request("https://example.com")
-    # auth引数に明示的にNoneを指定している
-    request("https://example.com", auth=None)
-
-``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-2)
--------------------------------------------------------------------
-
-この問題は `HTTPX <https://www.python-httpx.org/>`_ というライブラリで実際に議論の対象になった。
-`PEP 692のドキュメント <https://peps.python.org/pep-0692/>`_ にもこのIssueに関する記載がある。
-
-https://github.com/encode/httpx/issues/1384
-
-``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-3)
--------------------------------------------------------------------
-
-明示的に空の認証情報を指定する際のクラスを用意する手もあるが、関数のインターフェースが変わってしまう。
-
-.. revealjs-code-block:: python
-
-    class Auth:
-        """認証情報"""
-        ...
-
-    class Empty(Auth):
-       ...
-
-
-    def request(url: str, auth: Auth | None | Empty = None) -> None:
-        """url引数で指定したURLにリクエストを送る。
-        認証が必要な場合はauth引数に認証情報を指定"""
-        ...
-
-``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-4)
--------------------------------------------------------------------
-
-``**kwargs`` 引数を使うと解決する。
-
-.. revealjs-code-block:: python
-
-    from typing import TypedDict, Unpack, NotRequired
-
-    class OtherParams(TypedDict):
-        auth: NotRequired[Auth]  # 入力必須ではない場合はNotRequiredを指定
-
-    def request(url: str, **kwargs: Unpach[OtherParams]) -> None:
-        if "auth" not in kwargs:
-            print("auth引数が省略された場合の処理が呼ばれた")
-        elif "auth" in kwargs and kwargs["auth"] is None:
-            print("auth引数に明示的にNoneを渡した場合の処理が呼ばれた")
-
-PEP 698 メソッドをオーバーライドする際のtypoを防ぐ ``override`` デコレーターの登場
-----------------------------------------------------------------------------------
-
-Pythonでメソッドをオーバーライドするには
-----------------------------------------
-
-メソッド名、引数、戻り値を一致させる。
-
-.. revealjs-code-block:: python
-
-    >>> class Base:
-    ...     def say_hello(self, name):
-    ...         print("Hello, " + name)
-    ...
-    >>> class Example(Base):
-    ...     def say_hello(self, name):
-    ...         print("こんにちは、" + name)
-    ...
-    >>> example = Example()
-    >>> example.say_hello("Taro")
-    こんにちは、Taro
-
-typoがあるとオーバーライドできない
-----------------------------------
-
-.. revealjs-code-block:: python
-
-    >>> class Example(Base):
-    ...     def say_hallo(self, name):  # halloはtypo
-    ...         print("こんにちは、" + name)
-    ...
-    >>> example = Example()
-    >>> example.say_hello("Taro")  # 基底クラスのsay_helloメソッドが呼ばれる
-    Hello, Taro
-
-``override`` デコレーターを使うとどうなるか
--------------------------------------------
-
-``typing.override`` デコレーターを付けることでtypoしても型チェッカーが教えてくれる。
-
-.. revealjs-code-block:: python
-
-    from typing import Self, override
-
-    class Base:
-        def say_hello(self: Self, name: str) -> None:
-            print("Hello, " + name)
-
-    class Example(Base):
-        @override
-        def say_hallo(self: Self, name: str) -> None:  # halloはtypo
-            print("こんにちは、" + name)
-
-typoしているコードを型チェックすると
-------------------------------------
-
-該当箇所がエラーになる。
-
-.. figure:: pep698_example.*
-   :alt: Mypyの実行結果
-
-   Mypyの実行結果
-
 まとめ
 ======
 
-* 型ヒントの新構文でジェネリックが楽に書ける。f-stringはネスト可能に
+* 型ヒントの新構文でジェネリックや型エイリアスが楽に書ける。f-stringはネスト可能に
 * GILの改善や内包表記のインライン化などによりPythonのパフォーマンスが向上
 * 新たなデバックやモニタリング方法が登場。エラーメッセージもより親切に
 * 型ヒントの細かい部分の改善により、より型安全なコードが書けるように
