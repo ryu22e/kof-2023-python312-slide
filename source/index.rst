@@ -567,9 +567,9 @@ sysモジュールを使ってperfプロファイリングを有効にする例
 
     import sys
 
-    sys.activate_stack_trampoline("perf")
-    do_profiled_stuff()
-    sys.deactivate_stack_trampoline()
+    sys.activate_stack_trampoline("perf")  # 計測開始
+    do_profiled_stuff()  # 計測中
+    sys.deactivate_stack_trampoline()  # 計測終了
 
     non_profiled_stuff()
 
@@ -684,7 +684,7 @@ Python 3.12
 Python 3.12でのエラーメッセージの例(3-1)
 ----------------------------------------
 
-import文のtypoを指摘してくれる。
+import文の書き順の間違いを指摘してくれる。
 
 Python 3.11
 
@@ -713,7 +713,7 @@ Python 3.12
 Python 3.12でのエラーメッセージの例(4-1)
 ----------------------------------------
 
-``ImportError`` エラー時のメッセージがより具体的になった。
+import文のtypoを指摘してくれる。
 
 Python 3.11
 
