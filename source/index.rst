@@ -315,7 +315,7 @@ https://docs.python.org/ja/3/glossary.html#term-global-interpreter-lock
 GILの例
 -------
 
-以下のコードはマルチスレッドを使っているにも関わらず、 ``print_hello`` 関数が同時に実行されない。
+以下のコードはマルチスレッドを使っているにも関わらず、 ``print_hello()`` 関数が同時に実行されない。
 
 .. revealjs-code-block:: python
 
@@ -874,7 +874,7 @@ typoを防げる。
 -------------------------------------------------------------------
 
 この問題は `HTTPX <https://www.python-httpx.org/>`_ というライブラリで実際に議論の対象になった。
-`PEP 692のドキュメント <https://peps.python.org/pep-0692/>`_ にもこのIssueに関する記載がある。
+`PEP 692のドキュメント <https://peps.python.org/pep-0692/>`_ のMotivationの項にもこの問題が書かれている。
 
 https://github.com/encode/httpx/issues/1384
 
@@ -885,18 +885,17 @@ https://github.com/encode/httpx/issues/1384
 
 .. revealjs-code-block:: python
 
-    class Auth:
-        """認証情報"""
-        ...
-
+    # Authのコードは省略
     class Empty(Auth):
        ...
 
+    EMPTY = Empty()
 
     def request(url: str, auth: Auth | None | Empty = None) -> None:
-        """url引数で指定したURLにリクエストを送る。
-        認証が必要な場合はauth引数に認証情報を指定"""
         ...
+
+    # auth=Noneをauth=EMPTYに書き換える
+    request("https://example.com", auth=EMPTY)
 
 ``**kwargs`` 引数に ``TypedDict`` を指定することによるメリット(2-4)
 -------------------------------------------------------------------
@@ -910,6 +909,7 @@ https://github.com/encode/httpx/issues/1384
     class OtherParams(TypedDict):
         auth: NotRequired[Auth]  # 入力必須ではない場合はNotRequiredを指定
 
+    # authの代わりに**kwargsを指定する
     def request(url: str, **kwargs: Unpach[OtherParams]) -> None:
         if "auth" not in kwargs:
             print("auth引数が省略された場合の処理が呼ばれた")
@@ -948,7 +948,7 @@ typoがあるとオーバーライドできない
     ...         print("こんにちは、" + name)
     ...
     >>> example = Example()
-    >>> example.say_hello("Taro")  # 基底クラスのsay_helloメソッドが呼ばれる
+    >>> example.say_hello("Taro")  # 基底クラスBaseのsay_helloメソッドが呼ばれる
     Hello, Taro
 
 ``override`` デコレーターを使うとどうなるか
