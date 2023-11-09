@@ -34,6 +34,7 @@ release = "1.0"
 # ones.
 extensions = [
     "sphinx_revealjs",
+    "sphinxext.opengraph",
     "sphinx_budoux",
 ]
 budoux_target_tags = ["h1", "h2", "h3", "p"]
@@ -89,3 +90,19 @@ revealjs_css_files = [
     "revealjs4/plugin/highlight/zenburn.css",
     "css/title_uppercase.css",
 ]
+
+# https://github.com/wpilibsuite/sphinxext-opengraph
+ogp_site_url = "https://kof-2023-python312-slide.ryu22e.dev/"
+ogp_social_cards = {
+    "enable": True,
+}
+# https://sphinxext-opengraph.readthedocs.io/en/latest/socialcards.html
+ogp_social_cards = {
+    "enable": True,
+    "font": "Noto Sans CJK JP",
+}
+# font settings for macOS and Windows
+if sys.platform == "darwin":
+    ogp_social_cards["font"] = "Hiragino Maru Gothic Pro"
+elif sys.platform == "win32":
+    ogp_social_cards["font"] = "MS Gothic"
