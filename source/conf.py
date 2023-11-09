@@ -19,7 +19,7 @@ sys.path.append(os.path.abspath('_ext'))
 
 # -- Project information -----------------------------------------------------
 
-project = "kof 2023 python312 slide"
+project = "What's New in Python 3.12"
 copyright = "2023, Ryuji Tsutsui"
 author = "Ryuji Tsutsui"
 
