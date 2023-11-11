@@ -26,7 +26,10 @@ Ryuji Tsutsui
 PR
 --
 
-今日ブース（エリアB No.11）で「Python Boot Camp」、「PyLadies Caravan」の宣伝をやっています。
+.. figure:: pyconjp-booth.*
+   :alt: PyCon JP Associationブース
+
+   今日ブース（エリアB No.11）で「Python Boot Camp」、「PyLadies Caravan」の宣伝をやっています。
 
 今日話したいこと
 ----------------
