@@ -18,7 +18,7 @@ Ryuji Tsutsui
 
 * Ryuji Tsutsui @ryu22e
 * `一般社団法人PyCon JP Association運営メンバー <https://www.pycon.jp/committee/members.html#ryuji-tsutsui>`_
-* 株式会社hokan所属
+* `株式会社hokan <https://www.corp.hkn.jp/>`_ 所属
 * Python歴は12年くらい（主にDjango）
 * Python Boot Camp、Shonan.py、GCPUG Shonanなどコミュニティ活動もしています
 * 著書（共著）：『 `Python実践レシピ <https://gihyo.jp/book/2022/978-4-297-12576-9>`_ 』
